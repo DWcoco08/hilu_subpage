@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import './App.css';
-import Header from './components/Header/Header';
-import UploadArtwork from './components/UploadArtwork/UploadArtwork';
-import SetPricesDuration from './components/SetPricesDuration/SetPricesDuration';
-import EditPageLaunch from './components/EditPageLaunch/EditPageLaunch';
+import Header from './components/Header/Header.jsx';
+import UploadArtwork from './components/UploadArtwork/UploadArtwork.jsx';
+import SetPricesDuration from './components/SetPricesDuration/SetPricesDuration.jsx';
+import EditPageLaunch from './components/EditPageLaunch/EditPageLaunch.jsx';
 
 function App() {
   const [currentStep, setCurrentStep] = useState(1);
