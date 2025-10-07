@@ -1,10 +1,19 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './EditPageLaunch.css';
 
 function EditPageLaunch({ formData, updateFormData, prevStep }) {
-  const [selectedFeaturedProduct, setSelectedFeaturedProduct] = useState('red');
+  const [selectedFeaturedProduct, setSelectedFeaturedProduct] = useState(formData.featuredColor || null);
   const [description, setDescription] = useState('');
+  const [availableColors, setAvailableColors] = useState([]);
   const maxDescriptionLength = 150;
+
+  // Load colors from JSON file
+  useEffect(() => {
+    fetch('/colors.json')
+      .then(response => response.json())
+      .then(data => setAvailableColors(data.colors))
+      .catch(error => console.error('Error loading colors:', error));
+  }, []);
 
   const handleLaunch = () => {
     alert('Campaign launched successfully! 🎉\n\nThis is a demo. In production, this would submit your campaign for review.');
@@ -18,10 +27,18 @@ function EditPageLaunch({ formData, updateFormData, prevStep }) {
     }
   };
 
-  const featuredProducts = [
-    { id: 'white', color: '#ffffff', border: true },
-    { id: 'red', color: '#ef4444' }
-  ];
+  // Get featured products from selected colors
+  const featuredProducts = formData.selectedColors && formData.selectedColors.length > 0
+    ? formData.selectedColors.map(colorId => {
+        const color = availableColors.find(c => c.id === colorId);
+        return color ? {
+          id: colorId,
+          color: color.code,
+          name: color.name,
+          border: color.code === '#ffffff'
+        } : null;
+      }).filter(Boolean)
+    : [];
 
   return (
     <div className="edit-page-launch">
@@ -67,7 +84,7 @@ function EditPageLaunch({ formData, updateFormData, prevStep }) {
                   >
                     {selectedFeaturedProduct === product.id && (
                       <svg width="16" height="16" viewBox="0 0 16 16">
-                        <path d="M3 8l3 3 7-7" stroke={product.id === 'white' ? '#000' : '#fff'} strokeWidth="2" fill="none" />
+                        <path d="M3 8l3 3 7-7" stroke={product.color === '#ffffff' ? '#000' : '#fff'} strokeWidth="2" fill="none" />
                       </svg>
                     )}
                   </div>

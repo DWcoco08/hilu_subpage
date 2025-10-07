@@ -1,27 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './UploadArtwork.css';
+import ProductPlaceholder from './ProductPlaceholder';
 
 function UploadArtwork({ formData, updateFormData, nextStep }) {
   const [showBack, setShowBack] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
   const [showProductModal, setShowProductModal] = useState(false);
-  const [selectedColors, setSelectedColors] = useState(['black', 'navy']);
-  const [featuredColor, setFeaturedColor] = useState('black');
+  const [selectedColors, setSelectedColors] = useState([]);
+  const [featuredColor, setFeaturedColor] = useState('white');
   const [isFrontSaved, setIsFrontSaved] = useState(false);
   const [isBackSaved, setIsBackSaved] = useState(false);
+  const [availableColors, setAvailableColors] = useState([]);
 
-  // Available colors for the product
-  const availableColors = [
-    { id: 'black', name: 'Black', hex: '#000000' },
-    { id: 'navy', name: 'Navy', hex: '#1e2847' },
-    { id: 'grey', name: 'Grey', hex: '#9e9e9e' },
-    { id: 'red', name: 'Red', hex: '#ff0000' },
-    { id: 'darkblue', name: 'Dark Blue', hex: '#003366' },
-    { id: 'darkgreen', name: 'Dark Green', hex: '#006400' },
-    { id: 'white', name: 'White', hex: '#ffffff' },
-    { id: 'cream', name: 'Cream', hex: '#f5deb3' }
-  ];
+  // Load colors from JSON file
+  useEffect(() => {
+    fetch('/colors.json')
+      .then(response => response.json())
+      .then(data => setAvailableColors(data.colors))
+      .catch(error => console.error('Error loading colors:', error));
+  }, []);
 
   const handleDrag = (e) => {
     e.preventDefault();
@@ -110,18 +108,23 @@ function UploadArtwork({ formData, updateFormData, nextStep }) {
       const newColors = selectedColors.filter(c => c !== colorId);
       if (newColors.length > 0) {
         setSelectedColors(newColors);
+        updateFormData('selectedColors', newColors);
         if (featuredColor === colorId) {
           setFeaturedColor(newColors[0]);
+          updateFormData('featuredColor', newColors[0]);
         }
       }
     } else {
-      setSelectedColors([...selectedColors, colorId]);
+      const newColors = [...selectedColors, colorId];
+      setSelectedColors(newColors);
+      updateFormData('selectedColors', newColors);
     }
   };
 
   const handleFeaturedColorChange = (colorId) => {
     if (selectedColors.includes(colorId)) {
       setFeaturedColor(colorId);
+      updateFormData('featuredColor', colorId);
     }
   };
 
@@ -145,7 +148,7 @@ function UploadArtwork({ formData, updateFormData, nextStep }) {
                   <div
                     className="color-swatch"
                     style={{
-                      backgroundColor: color.hex,
+                      backgroundColor: color.code,
                       border: color.id === 'white' ? '2px solid #ddd' : 'none'
                     }}
                   />
@@ -175,7 +178,7 @@ function UploadArtwork({ formData, updateFormData, nextStep }) {
                     <div
                       className="color-swatch"
                       style={{
-                        backgroundColor: color.hex,
+                        backgroundColor: color.code,
                         border: colorId === 'white' ? '2px solid #ddd' : 'none'
                       }}
                     />
@@ -294,11 +297,7 @@ function UploadArtwork({ formData, updateFormData, nextStep }) {
         <div className="product-selection-panel">
           <h3 className="panel-title">SELECT PRODUCTS</h3>
           <div className="selected-product">
-            <img
-              src="https://d3fc22kf489ohb.cloudfront.net/img/product/square/60c1f2236503d9.80322275.png"
-              alt="Essentials Classic Tee"
-              className="product-thumb"
-            />
+            <ProductPlaceholder className="product-thumb" />
             <div className="product-info">
               <p className="product-brand">EVERPRESS</p>
               <p className="product-name">Essentials Classic Tee</p>
@@ -357,7 +356,7 @@ function UploadArtwork({ formData, updateFormData, nextStep }) {
                 <h3>T-SHIRTS</h3>
                 <div className="product-grid">
                   <div className="product-card">
-                    <img src="https://d3fc22kf489ohb.cloudfront.net/img/product/square/60c1f2236503d9.80322275.png" alt="Essentials Classic Tee" />
+                    <ProductPlaceholder width={120} height={120} />
                     <p className="product-card-name">Essentials Classic Tee</p>
                     <div className="product-colors">
                       <span className="color-dot" style={{backgroundColor: '#000'}}></span>
@@ -371,7 +370,7 @@ function UploadArtwork({ formData, updateFormData, nextStep }) {
                 <h3>HOODIES</h3>
                 <div className="product-grid">
                   <div className="product-card">
-                    <img src="https://d3fc22kf489ohb.cloudfront.net/img/product/square/60c1f2236503d9.80322275.png" alt="Essential Hoodie" />
+                    <ProductPlaceholder width={120} height={120} />
                     <p className="product-card-name">Essential Hoodie</p>
                     <div className="product-colors">
                       <span className="color-dot" style={{backgroundColor: '#000'}}></span>

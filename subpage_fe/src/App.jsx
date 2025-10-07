@@ -18,7 +18,9 @@ function App() {
     campaignDuration: 14,
     campaignTitle: '',
     description: '',
-    creatorName: ''
+    creatorName: '',
+    selectedColors: [],
+    featuredColor: null
   });
 
   const nextStep = () => {
