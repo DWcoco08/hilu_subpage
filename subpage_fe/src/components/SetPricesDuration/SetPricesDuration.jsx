@@ -1,25 +1,38 @@
-import React, { useState } from 'react';
-import './SetPricesDuration.css';
+import React, { useState, useEffect } from "react";
+import toast from "react-hot-toast";
+import "./SetPricesDuration.css";
 
 function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
   const [salesGoal, setSalesGoal] = useState(1);
   const [customDays, setCustomDays] = useState(28);
-  const [selectedDuration, setSelectedDuration] = useState('14');
+  const [selectedDuration, setSelectedDuration] = useState("14");
+  const [exchangeRate, setExchangeRate] = useState(1);
+  const [loading, setLoading] = useState(false);
 
-  const currencies = ['£ GBP', '$ USD', '€ EUR'];
+  const currencies = [
+    { code: "USD", symbol: "$", label: "$ USD" },
+    { code: "VND", symbol: "₫", label: "₫ VND" },
+  ];
+
+  // Fetch exchange rate when currency changes
+  useEffect(() => {
+    if (formData.currency === "VND") {
+      fetchExchangeRate("USD", "VND");
+    }
+  }, [formData.currency]);
 
   const handleDurationSelect = (days) => {
     setSelectedDuration(days);
-    if (days !== 'custom') {
-      updateFormData('campaignDuration', parseInt(days));
+    if (days !== "custom") {
+      updateFormData("campaignDuration", parseInt(days));
     }
   };
 
   const handleCustomDaysChange = (e) => {
     const value = parseInt(e.target.value) || 28;
     setCustomDays(value);
-    if (selectedDuration === 'custom') {
-      updateFormData('campaignDuration', value);
+    if (selectedDuration === "custom") {
+      updateFormData("campaignDuration", value);
     }
   };
 
@@ -28,10 +41,64 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
     setSalesGoal(value);
   };
 
+  // Fetch exchange rate from backend API
+  const fetchExchangeRate = async (fromCurrency, toCurrency) => {
+    setLoading(true);
+    try {
+      const response = await fetch(
+        "http://localhost:54321/functions/v1/convert-currency",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: 1,
+            fromCurrency,
+            toCurrency,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch exchange rate");
+      }
+
+      const data = await response.json();
+      if (data.success) {
+        setExchangeRate(data.data.rate);
+      } else {
+        throw new Error(data.error || "Unknown error");
+      }
+    } catch (error) {
+      console.error("Error fetching exchange rate:", error);
+      toast.error("Failed to fetch exchange rate");
+      // Use fallback rate
+      setExchangeRate(formData.currency === "VND" ? 25000 : 1);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format number with thousand separators
+  const formatNumber = (num, isCurrency = false) => {
+    const parts = num.toString().split(".");
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    return parts.join(".");
+  };
+
   // Calculate profit estimate
   const calculateProfit = () => {
     const profitPerItem = formData.profit || 5;
-    return (profitPerItem * salesGoal).toFixed(2);
+    const profit = profitPerItem * salesGoal;
+
+    // If currency is VND, convert from USD
+    if (formData.currency === "VND") {
+      const vndProfit = (profit * exchangeRate).toFixed(0);
+      return formatNumber(vndProfit);
+    }
+
+    return formatNumber(profit.toFixed(2));
   };
 
   return (
@@ -39,7 +106,8 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
       <div className="page-header">
         <h1 className="page-title">SET PRICES AND DURATION</h1>
         <p className="page-subtitle">
-          Choose prices for each of the garments, set a sales target, and edit the sales duration for the campaign.
+          Choose prices for each of the garments, set a sales target, and edit
+          the sales duration for the campaign.
           <br />
           Profit per item increases with the amount of garments sold.
         </p>
@@ -52,7 +120,8 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
           <div className="section-card">
             <h3 className="section-title">SET PRODUCT PRICES</h3>
             <p className="section-description">
-              You can set how much the garments are sold for as long as they make profit.
+              You can set how much the garments are sold for as long as they
+              make profit.
             </p>
 
             <div className="product-price-item">
@@ -61,7 +130,11 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
                   <img
                     src="https://d3fc22kf489ohb.cloudfront.net/img/product/original/60c1f2236503d9.80322275.png"
                     alt="Product"
-                    style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                    style={{
+                      width: "100%",
+                      height: "100%",
+                      objectFit: "contain",
+                    }}
                   />
                 </div>
                 <div className="product-details">
@@ -75,7 +148,9 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
                   <input
                     type="number"
                     value={formData.baseCost || 20}
-                    onChange={(e) => updateFormData('baseCost', parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      updateFormData("baseCost", parseFloat(e.target.value))
+                    }
                     step="1"
                     min="0"
                   />
@@ -83,12 +158,19 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
                 <div className="price-field">
                   <label>
                     Profit/Sale
-                    <span className="help-icon" title="Your profit per item sold">?</span>
+                    <span
+                      className="help-icon"
+                      title="Your profit per item sold"
+                    >
+                      ?
+                    </span>
                   </label>
                   <input
                     type="number"
                     value={formData.profit || 5}
-                    onChange={(e) => updateFormData('profit', parseFloat(e.target.value))}
+                    onChange={(e) =>
+                      updateFormData("profit", parseFloat(e.target.value))
+                    }
                     step="1"
                     min="0"
                   />
@@ -96,11 +178,19 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
                 <div className="price-field">
                   <label>
                     Selling Price
-                    <span className="help-icon" title="Total price customers will pay">?</span>
+                    <span
+                      className="help-icon"
+                      title="Total price customers will pay"
+                    >
+                      ?
+                    </span>
                   </label>
                   <input
                     type="number"
-                    value={(parseFloat(formData.baseCost || 20) + parseFloat(formData.profit || 5)).toFixed(2)}
+                    value={(
+                      parseFloat(formData.baseCost || 20) +
+                      parseFloat(formData.profit || 5)
+                    ).toFixed(2)}
                     readOnly
                     className="readonly-price"
                   />
@@ -112,19 +202,27 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
           {/* Campaign Currency */}
           <div className="section-card">
             <h3 className="section-title">CAMPAIGN CURRENCY</h3>
-            <p className="section-description">This is reflected in your reports.</p>
+            <p className="section-description">
+              This is reflected in your reports.
+            </p>
 
             <div className="currency-select-wrapper">
               <label className="input-label">Currency</label>
               <select
                 className="currency-select"
-                value={formData.currency || '£ GBP'}
-                onChange={(e) => updateFormData('currency', e.target.value)}
+                value={formData.currency || "USD"}
+                onChange={(e) => updateFormData("currency", e.target.value)}
+                disabled={loading}
               >
-                {currencies.map(curr => (
-                  <option key={curr} value={curr}>{curr}</option>
+                {currencies.map((curr) => (
+                  <option key={curr.code} value={curr.code}>
+                    {curr.label}
+                  </option>
                 ))}
               </select>
+              {loading && (
+                <p className="loading-text">Fetching exchange rate...</p>
+              )}
             </div>
           </div>
 
@@ -132,7 +230,12 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
           <div className="section-card">
             <div className="section-header-with-icon">
               <h3 className="section-title">SALES DURATION</h3>
-              <span className="help-icon" title="How long your campaign will run for">?</span>
+              <span
+                className="help-icon"
+                title="How long your campaign will run for"
+              >
+                ?
+              </span>
             </div>
             <p className="section-description">
               Choose how many days you'd like the campaign to run for:
@@ -140,32 +243,40 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
 
             <div className="duration-buttons">
               <button
-                className={`duration-btn ${selectedDuration === '7' ? 'active' : ''}`}
-                onClick={() => handleDurationSelect('7')}
+                className={`duration-btn ${
+                  selectedDuration === "7" ? "active" : ""
+                }`}
+                onClick={() => handleDurationSelect("7")}
               >
                 7 DAYS
               </button>
               <button
-                className={`duration-btn ${selectedDuration === '14' ? 'active' : ''}`}
-                onClick={() => handleDurationSelect('14')}
+                className={`duration-btn ${
+                  selectedDuration === "14" ? "active" : ""
+                }`}
+                onClick={() => handleDurationSelect("14")}
               >
                 14 DAYS
               </button>
               <button
-                className={`duration-btn ${selectedDuration === '21' ? 'active' : ''}`}
-                onClick={() => handleDurationSelect('21')}
+                className={`duration-btn ${
+                  selectedDuration === "21" ? "active" : ""
+                }`}
+                onClick={() => handleDurationSelect("21")}
               >
                 21 DAYS
               </button>
               <button
-                className={`duration-btn ${selectedDuration === 'custom' ? 'active' : ''}`}
-                onClick={() => handleDurationSelect('custom')}
+                className={`duration-btn ${
+                  selectedDuration === "custom" ? "active" : ""
+                }`}
+                onClick={() => handleDurationSelect("custom")}
               >
                 28+ DAYS
               </button>
             </div>
 
-            {selectedDuration === 'custom' && (
+            {selectedDuration === "custom" && (
               <div className="custom-days-input">
                 <label className="input-label">Days</label>
                 <input
@@ -183,7 +294,12 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
           <div className="section-card">
             <div className="section-header-with-icon">
               <h3 className="section-title">SALES GOAL</h3>
-              <span className="help-icon" title="Estimated number of items you expect to sell">?</span>
+              <span
+                className="help-icon"
+                title="Estimated number of items you expect to sell"
+              >
+                ?
+              </span>
             </div>
             <p className="section-description">
               How many items do you estimate your design will sell?
@@ -199,25 +315,27 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
                   onChange={handleSalesGoalChange}
                   className="sales-slider"
                   style={{
-                    '--progress-value': `${((salesGoal - 1) / (1250 - 1)) * 100}%`
+                    "--progress-value": `${
+                      ((salesGoal - 1) / (1250 - 1)) * 100
+                    }%`,
                   }}
                 />
                 <div
                   className="slider-tooltip"
                   style={{
-                    left: `${((salesGoal - 1) / (1250 - 1)) * 100}%`
+                    left: `${((salesGoal - 1) / (1250 - 1)) * 100}%`,
                   }}
                 >
                   {salesGoal}
                 </div>
               </div>
               <div className="slider-labels">
-                <span className={salesGoal >= 1 ? 'active' : ''}>1</span>
-                <span className={salesGoal >= 250 ? 'active' : ''}>250</span>
-                <span className={salesGoal >= 500 ? 'active' : ''}>500</span>
-                <span className={salesGoal >= 750 ? 'active' : ''}>750</span>
-                <span className={salesGoal >= 1000 ? 'active' : ''}>1000</span>
-                <span className={salesGoal >= 1250 ? 'active' : ''}>1250</span>
+                <span className={salesGoal >= 1 ? "active" : ""}>1</span>
+                <span className={salesGoal >= 250 ? "active" : ""}>250</span>
+                <span className={salesGoal >= 500 ? "active" : ""}>500</span>
+                <span className={salesGoal >= 750 ? "active" : ""}>750</span>
+                <span className={salesGoal >= 1000 ? "active" : ""}>1000</span>
+                <span className={salesGoal >= 1250 ? "active" : ""}>1250</span>
               </div>
               <div className="sales-value">
                 <label>Sales</label>
@@ -232,9 +350,12 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
           {/* Profit Estimate */}
           <div className="section-card profit-card">
             <h3 className="section-title">PROFIT ESTIMATE</h3>
-            <p className="profit-description">With {salesGoal} sales you'll earn an estimated:</p>
+            <p className="profit-description">
+              With {salesGoal} sales you'll earn an estimated:
+            </p>
             <div className="profit-amount">
-              £{calculateProfit()}
+              {calculateProfit()}
+              {formData.currency === "VND" ? "₫" : "$"}
               <span className="per-campaign">per campaign</span>
             </div>
           </div>
