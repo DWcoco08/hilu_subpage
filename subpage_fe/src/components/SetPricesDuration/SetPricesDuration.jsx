@@ -41,40 +41,21 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
     setSalesGoal(value);
   };
 
-  // Fetch exchange rate from backend API
+  // Fetch exchange rate from public API with real-time rates
   const fetchExchangeRate = async (fromCurrency, toCurrency) => {
     setLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:54321/functions/v1/convert-currency",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            amount: 1,
-            fromCurrency,
-            toCurrency,
-          }),
-        }
+        `https://api.exchangerate-api.com/v4/latest/${fromCurrency}`
       );
 
-      if (!response.ok) {
-        throw new Error("Failed to fetch exchange rate");
-      }
-
       const data = await response.json();
-      if (data.success) {
-        setExchangeRate(data.data.rate);
-      } else {
-        throw new Error(data.error || "Unknown error");
-      }
+      const rate = data.rates[toCurrency];
+
+      setExchangeRate(rate);
+      toast.success(`Exchange rate updated: 1 ${fromCurrency} = ${rate.toFixed(2)} ${toCurrency}`);
     } catch (error) {
       console.error("Error fetching exchange rate:", error);
-      toast.error("Failed to fetch exchange rate");
-      // Use fallback rate
-      setExchangeRate(formData.currency === "VND" ? 25000 : 1);
     } finally {
       setLoading(false);
     }
@@ -138,7 +119,6 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
                   />
                 </div>
                 <div className="product-details">
-                  <p className="product-brand">EVERPRESS</p>
                   <p className="product-name">Essentials Classic Tee</p>
                 </div>
               </div>
@@ -209,6 +189,7 @@ function SetPricesDuration({ formData, updateFormData, nextStep, prevStep }) {
             <div className="currency-select-wrapper">
               <label className="input-label">Currency</label>
               <select
+                border="none"
                 className="currency-select"
                 value={formData.currency || "USD"}
                 onChange={(e) => updateFormData("currency", e.target.value)}
