@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Toaster } from 'react-hot-toast';
 import './App.css';
 import Header from './components/Header/Header.jsx';
 import UploadArtwork from './components/UploadArtwork/UploadArtwork.jsx';
@@ -50,6 +51,7 @@ function App() {
 
   return (
     <div className="App">
+      <Toaster position="top-center" reverseOrder={false} />
       <Header
         currentStep={currentStep}
         nextStep={nextStep}

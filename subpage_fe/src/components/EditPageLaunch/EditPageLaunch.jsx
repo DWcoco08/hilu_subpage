@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import toast from 'react-hot-toast';
 import './EditPageLaunch.css';
 
 function EditPageLaunch({ formData, updateFormData, prevStep }) {
@@ -16,7 +17,23 @@ function EditPageLaunch({ formData, updateFormData, prevStep }) {
   }, []);
 
   const handleLaunch = () => {
-    alert('Campaign launched successfully! 🎉\n\nThis is a demo. In production, this would submit your campaign for review.');
+    // Validation
+    if (!formData.campaignTitle?.trim()) {
+      toast.error('Please enter a campaign name');
+      return;
+    }
+    if (!formData.creatorName?.trim()) {
+      toast.error('Please enter your name');
+      return;
+    }
+    if (!formData.artwork) {
+      toast.error('Please upload artwork before launching');
+      return;
+    }
+
+    // Success message
+    toast.success('Campaign launched successfully! 🎉');
+    console.log('Campaign data:', formData);
   };
 
   const handleDescriptionChange = (e) => {

@@ -1,13 +1,13 @@
 .set-prices-duration {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 60px 40px;
+  padding: 10px 40px 40px 40px;
   background: #fff;
 }
 
 .page-header {
   text-align: center;
-  margin-bottom: 60px;
+  margin-bottom: 20px;
 }
 
 .page-title {
@@ -655,7 +655,7 @@
 
 @media (max-width: 768px) {
   .set-prices-duration {
-    padding: 40px 20px;
+    padding: 10px 20px;
   }
 
   .page-title {

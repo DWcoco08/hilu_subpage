@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
+import toast from "react-hot-toast";
 import './UploadArtwork.css';
 import ProductPlaceholder from './ProductPlaceholder';
 
-function UploadArtwork({ formData, updateFormData, nextStep }) {
+function UploadArtwork({ formData, updateFormData, nextStep, prevStep }) {
   const [showBack, setShowBack] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
@@ -75,12 +76,12 @@ function UploadArtwork({ formData, updateFormData, nextStep }) {
     if (showBack) {
       if (formData.artworkBack) {
         setIsBackSaved(true);
-        alert('Back artwork saved! In production, this would save to the server.');
+        toast.success('Back artwork saved!');
       }
     } else {
       if (formData.artwork) {
         setIsFrontSaved(true);
-        alert('Front artwork saved! In production, this would save to the server.');
+        toast.success('Front artwork saved!');
       }
     }
   };
@@ -100,7 +101,7 @@ function UploadArtwork({ formData, updateFormData, nextStep }) {
   };
 
   const handlePreview = () => {
-    alert('Preview functionality would show full-size preview here.');
+    toast.info('Preview would show full-size preview here');
   };
 
   const toggleColor = (colorId) => {
@@ -308,8 +309,6 @@ function UploadArtwork({ formData, updateFormData, nextStep }) {
           </button>
         </div>
       )}
-
-      {/* Product Selection Modal */}
       {showProductModal && (
         <>
           <div className="modal-overlay" onClick={() => setShowProductModal(false)}></div>

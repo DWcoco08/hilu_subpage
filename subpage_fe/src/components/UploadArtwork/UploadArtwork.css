@@ -1,10 +1,10 @@
 .upload-artwork {
   display: flex;
-  gap: 40px;
+  gap: 16px;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 40px 20px;
-  min-height: calc(100vh - 100px);
+  padding: 10px 20px;
+  min-height: auto;
 }
 
 /* Left Panel - Color Selection */
@@ -14,7 +14,7 @@
 }
 
 .panel-section {
-  margin-bottom: 32px;
+  margin-bottom: 16px;
 }
 
 .panel-title {
@@ -633,7 +633,7 @@
   text-transform: uppercase;
   font-weight: 600;
   letter-spacing: 1px;
-  margin-bottom: 32px;
+  margin-bottom: 16px;
 }
 
 .guideline-section {
@@ -710,3 +710,4 @@
     flex-direction: column;
   }
 }
+
