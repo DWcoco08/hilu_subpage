@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import toast from "react-hot-toast";
 import './UploadArtwork.css';
-import ProductPlaceholder from './ProductPlaceholder';
 
 function UploadArtwork({ formData, updateFormData, nextStep, prevStep }) {
   const [showBack, setShowBack] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   const [showGuidelines, setShowGuidelines] = useState(false);
-  const [showProductModal, setShowProductModal] = useState(false);
   const [selectedColors, setSelectedColors] = useState([]);
   const [featuredColor, setFeaturedColor] = useState('white');
   const [isFrontSaved, setIsFrontSaved] = useState(false);
@@ -293,102 +291,6 @@ function UploadArtwork({ formData, updateFormData, nextStep, prevStep }) {
         </div>
       </div>
 
-      {/* Right Panel - Product Selection */}
-      {formData.artwork && isFrontSaved && (
-        <div className="product-selection-panel">
-          <h3 className="panel-title">SELECT PRODUCTS</h3>
-          <div className="selected-product">
-            <ProductPlaceholder className="product-thumb" />
-            <div className="product-info">
-              <p className="product-brand">EVERPRESS</p>
-              <p className="product-name">Essentials Classic Tee</p>
-            </div>
-          </div>
-          <button className="btn-edit-products" onClick={() => setShowProductModal(true)}>
-            ADD/EDIT PRODUCTS
-          </button>
-        </div>
-      )}
-      {showProductModal && (
-        <>
-          <div className="modal-overlay" onClick={() => setShowProductModal(false)}></div>
-          <div className="product-modal">
-            <div className="modal-header">
-              <h2 className="modal-title">SELECT PRODUCTS</h2>
-              <button className="modal-close" onClick={() => setShowProductModal(false)}>
-                &times;
-              </button>
-            </div>
-
-            <div className="modal-filters">
-              <div className="filter-group">
-                <label>Product type</label>
-                <select className="filter-select">
-                  <option>All products</option>
-                  <option>T-shirts</option>
-                  <option>Hoodies</option>
-                  <option>Sweatshirts</option>
-                </select>
-              </div>
-              <div className="filter-group">
-                <label>Gender</label>
-                <select className="filter-select">
-                  <option>All</option>
-                  <option>Unisex</option>
-                  <option>Women</option>
-                  <option>Men</option>
-                </select>
-              </div>
-              <div className="filter-group">
-                <label>Fit</label>
-                <select className="filter-select">
-                  <option>All</option>
-                  <option>Regular</option>
-                  <option>Slim</option>
-                  <option>Relaxed</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="modal-content">
-              <div className="product-categories">
-                <h3>T-SHIRTS</h3>
-                <div className="product-grid">
-                  <div className="product-card">
-                    <ProductPlaceholder width={120} height={120} />
-                    <p className="product-card-name">Essentials Classic Tee</p>
-                    <div className="product-colors">
-                      <span className="color-dot" style={{backgroundColor: '#000'}}></span>
-                      <span className="color-dot" style={{backgroundColor: '#fff', border: '1px solid #ddd'}}></span>
-                      <span className="color-dot" style={{backgroundColor: '#1e2847'}}></span>
-                    </div>
-                    <button className="btn-select-product">Select</button>
-                  </div>
-                </div>
-
-                <h3>HOODIES</h3>
-                <div className="product-grid">
-                  <div className="product-card">
-                    <ProductPlaceholder width={120} height={120} />
-                    <p className="product-card-name">Essential Hoodie</p>
-                    <div className="product-colors">
-                      <span className="color-dot" style={{backgroundColor: '#000'}}></span>
-                      <span className="color-dot" style={{backgroundColor: '#666'}}></span>
-                    </div>
-                    <button className="btn-select-product">Select</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="modal-footer">
-              <button className="btn-modal-done" onClick={() => setShowProductModal(false)}>
-                DONE
-              </button>
-            </div>
-          </div>
-        </>
-      )}
 
       {/* Guidelines Panel */}
       {showGuidelines && (

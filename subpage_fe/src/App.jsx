@@ -18,10 +18,12 @@ function App() {
     currency: '$ USD',
     campaignDuration: 14,
     campaignTitle: '',
+    campaignSlug: '',
     description: '',
     creatorName: '',
     selectedColors: [],
-    featuredColor: null
+    featuredColor: null,
+    logo: null
   });
 
   const nextStep = () => {

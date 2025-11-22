@@ -6,6 +6,7 @@ function EditPageLaunch({ formData, updateFormData, prevStep }) {
   const [selectedFeaturedProduct, setSelectedFeaturedProduct] = useState(formData.featuredColor || null);
   const [description, setDescription] = useState('');
   const [availableColors, setAvailableColors] = useState([]);
+  const [campaignSlug, setCampaignSlug] = useState(formData.campaignSlug || '');
   const maxDescriptionLength = 150;
 
   // Load colors from JSON file
@@ -42,6 +43,24 @@ function EditPageLaunch({ formData, updateFormData, prevStep }) {
       setDescription(value);
       updateFormData('description', value);
     }
+  };
+
+  const handleLogoUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        updateFormData('logo', event.target?.result);
+        toast.success('Logo uploaded successfully');
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleCampaignSlugChange = (e) => {
+    const value = e.target.value;
+    setCampaignSlug(value);
+    updateFormData('campaignSlug', value);
   };
 
   // Get featured products from selected colors
@@ -113,13 +132,19 @@ function EditPageLaunch({ formData, updateFormData, prevStep }) {
 
         {/* Right Column - Campaign Details */}
         <div className="details-column">
-          <button className="btn-add-logo">
+          <label className="btn-add-logo">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
               <rect x="2" y="2" width="16" height="16" rx="2" stroke="currentColor" strokeWidth="1.5" />
               <path d="M6 8l2 2 4-4" stroke="currentColor" strokeWidth="1.5" fill="none" />
             </svg>
             ADD YOUR LOGO
-          </button>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleLogoUpload}
+              style={{ display: 'none' }}
+            />
+          </label>
 
           <div className="form-group">
             <label className="form-label-simple">Campaign name</label>
@@ -135,13 +160,13 @@ function EditPageLaunch({ formData, updateFormData, prevStep }) {
           <div className="form-group">
             <label className="form-label-simple">
               Campaign slug
-              <span className="help-icon-small">?</span>
+              <span className="help-icon-small" title="URL-friendly unique identifier for your campaign" data-tooltip="URL-friendly unique identifier for your campaign">?</span>
             </label>
             <input
               type="text"
               className="form-input-simple"
-              value={formData.campaignTitle ? formData.campaignTitle.toLowerCase().replace(/\s+/g, '-') : ''}
-              readOnly
+              value={campaignSlug || (formData.campaignTitle ? formData.campaignTitle.toLowerCase().replace(/\s+/g, '-') : '')}
+              onChange={handleCampaignSlugChange}
               placeholder="campaign-slug"
             />
           </div>
@@ -173,7 +198,7 @@ function EditPageLaunch({ formData, updateFormData, prevStep }) {
                 onChange={(e) => updateFormData('creatorName', e.target.value)}
                 placeholder="Enter your name"
               />
-              <span className="help-icon-small">?</span>
+              <span className="help-icon-small" title="Your name as the campaign creator" data-tooltip="Your name as the campaign creator">?</span>
             </div>
           </div>
         </div>
